@@ -24,7 +24,10 @@ export default new Service<IOClients, State, ParamsContext>({
   clients: {
     options: {
       default: {
-        retries: 2,
+        exponentialTimeoutCoefficient: 2,
+        exponentialBackoffCoefficient: 2,
+        initialBackoffDelay: 50,
+        retries: 1,
         timeout: ONE_SECOND_MS,
         concurrency: CONCURRENCY,
       },
