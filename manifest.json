@@ -3,7 +3,7 @@
   "name": "broadcaster-worker",
   "vendor": "vtex",
   "version": "0.0.0",
-  "title": "Broadcaster Workder",
+  "title": "Broadcaster Worker",
   "description": "Reference app for VTEX IO Services",
   "dependencies": {
     "vtex.catalog-api-proxy": "0.x",
