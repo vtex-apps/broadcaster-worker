@@ -7,7 +7,7 @@
   "workers": 4,
   "events": {
     "broadcasterNotification": {
-      "sender": "vtex.broadcaster-colossus-adapter",
+      "sender": "vtex.broadcaster",
       "keys": ["broadcaster.notification"]
     }
   }
