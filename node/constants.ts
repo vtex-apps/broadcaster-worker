@@ -1,6 +1,7 @@
 import { appIdToAppAtMajor } from "@vtex/api"
 
 export const USER_BUCKET = 'listener'
+export const PRODUCTS_BUCKET = 'products'
 
 export const VTEX_APP_ID = process.env.VTEX_APP_ID!
 

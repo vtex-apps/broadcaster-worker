@@ -1,7 +1,7 @@
-import { IOContext, IOClients } from '@vtex/api'
+import { IOContext, IOClients, VBase } from '@vtex/api'
 import { isEmpty, isNil } from 'ramda'
 
-import { USER_BUCKET } from '../constants'
+import { USER_BUCKET, PRODUCTS_BUCKET} from '../constants'
 import {
   objToHash,
   providerToVbaseFilename,
@@ -44,19 +44,31 @@ const replaceIfChanged = async <T>(
   return false
 }
 
+const fifteenMinutesFromNowMS = () => `${new Date(Date.now() + 15 * 60 * 1000)}`
+
+const productWasProcessed = async (productId: string, vbase: VBase) => {
+  const productFile = `${productId}.json`
+  const productMetaInfo = await vbase.getJSON<{ endDate: string }>(PRODUCTS_BUCKET, productFile, true) 
+  const date = productMetaInfo?.endDate && new Date(productMetaInfo.endDate)
+  if (date && date.toString() !== 'Invalid Date' && date > new Date()) {
+    return true
+  }
+  await vbase.saveJSON<{ endDate: string }>(PRODUCTS_BUCKET, productFile, { endDate: fifteenMinutesFromNowMS() })
+  return false
+}
 const logError = (logger: IOContext['logger']) => (err: any) => logger.error(err)
 
 export async function notify(ctx: Context, next: () => Promise<any>) {
   const {
-    clients: { catalogGraphQL, events },
+    clients: { catalogGraphQL, events,  vbase },
     clients,
-    state: { alwaysNotify }, 
+    state: { alwaysNotify },
     body: { IdSku },
     vtex: { production, logger },
   } = ctx
   const eventPromises = []
   const changedEntities: Record<string, 1> = {}
-  const logWholeProductAndSku = {sku: {}, product: {}}
+  const logWholeProductAndSku = { sku: {}, product: {} }
 
   // Modification in SKU
   const skuResponse = await catalogGraphQL.sku(IdSku).catch(logError(logger))
@@ -72,54 +84,61 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
     changedEntities.sku = 1
   }
 
-  // Modification in Product
-  const productResponse = await catalogGraphQL.product(sku.productId).catch(logError(logger))
-  if (!productResponse || !productResponse.product) {
-    return
-  }
-  const { product } = productResponse
-  const filenameProduct = providerToVbaseFilename(
-    toProductProvider(sku.productId)
-  )
-  changed = await replaceIfChanged(product, filenameProduct, clients)
-  if (alwaysNotify || changed) {
-    logWholeProductAndSku.product = product
-    eventPromises.push(events.sendEvent('', productChanged, product))
-    changedEntities.product = 1
-  }
+  const notProcessed = !await productWasProcessed(sku.productId, vbase)
+  if (notProcessed) {
+    // Modification in Product
+    const productResponse = await catalogGraphQL.product(sku.productId).catch(logError(logger))
+    if (!productResponse || !productResponse.product) {
+      return
+    }
+    const { product } = productResponse
+    const filenameProduct = providerToVbaseFilename(
+      toProductProvider(sku.productId)
+    )
+    changed = await replaceIfChanged(product, filenameProduct, clients)
+    if (alwaysNotify || changed) {
+      logWholeProductAndSku.product = product
+      eventPromises.push(events.sendEvent('', productChanged, product))
+      changedEntities.product = 1
+    }
 
-  // Modification in Brand
-  const brandResponse = await catalogGraphQL.brand(product.brandId).catch(logError(logger))
-  if (!brandResponse || !brandResponse.brand) {
-    return
-  }
-  const { brand } = brandResponse
-  const filenameBrand = providerToVbaseFilename(
-    toBrandProvider(product.brandId)
-  )
-  changed = await replaceIfChanged(brand, filenameBrand, clients)
-  if (alwaysNotify || changed) {
-    eventPromises.push(events.sendEvent('', brandChanged, brand))
-    changedEntities.brand = 1
-  }
+    // Modification in Brand
+    const brandResponse = await catalogGraphQL.brand(product.brandId).catch(logError(logger))
+    if (!brandResponse || !brandResponse.brand) {
+      return
+    }
+    const { brand } = brandResponse
+    const filenameBrand = providerToVbaseFilename(
+      toBrandProvider(product.brandId)
+    )
+    changed = await replaceIfChanged(brand, filenameBrand, clients)
+    if (alwaysNotify || changed) {
+      eventPromises.push(events.sendEvent('', brandChanged, brand))
+      changedEntities.brand = 1
+    }
 
-  // Modification in Category
-  const categoryResponse = await catalogGraphQL.category(product.categoryId).catch(logError(logger))
-  if (!categoryResponse || !categoryResponse.category) {
-    return
-  }
-  const { category } = categoryResponse
-  const filenameCategory = providerToVbaseFilename(
-    toCategoryProvider(category.id)
-  )
-  changed = await replaceIfChanged(category, filenameCategory, clients)
-  if (alwaysNotify || changed) {
-    eventPromises.push(events.sendEvent('', categoryChanged, category))
-    changedEntities.category = 1
-  }
+    // Modification in Category
+    const categoryResponse = await catalogGraphQL.category(product.categoryId).catch(logError(logger))
+    if (!categoryResponse || !categoryResponse.category) {
+      return
+    }
+    const { category } = categoryResponse
+    const filenameCategory = providerToVbaseFilename(
+      toCategoryProvider(category.id)
+    )
+    changed = await replaceIfChanged(category, filenameCategory, clients)
+    if (alwaysNotify || changed) {
+      eventPromises.push(events.sendEvent('', categoryChanged, category))
+      changedEntities.category = 1
+    }
 
-  // Wait for all events to be sent
-  await Promise.all(eventPromises)
+    // Wait for all events to be sent
+    await Promise.all(eventPromises)
+
+    if (!production) {
+      console.log('changedEntities', changedEntities, {sku: sku.id, brand: brand.id, product: product.id, category: category.id})
+    }
+  }
 
   metrics.batch('changed-entities', undefined, changedEntities)
 
@@ -129,10 +148,6 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
       'product': logWholeProductAndSku.product
     })
   }
-
-  if (!production) {
-    console.log('changedEntities', changedEntities, {sku: sku.id, brand: brand.id, product: product.id, category: category.id})
-  }
-
+  
   await next()
 }
