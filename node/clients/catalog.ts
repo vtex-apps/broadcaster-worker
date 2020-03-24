@@ -20,7 +20,7 @@ export class Catalog extends ExternalClient {
           ...(options?.headers ?? {}),
           'Content-Type': 'application/json',
           'X-Vtex-Use-Https': 'true',
-          ...(context.adminUserAuthToken? { VtexIdclientAutCookie: context.adminUserAuthToken }: null),
+          VtexIdclientAutCookie: context.adminUserAuthToken || context.authToken,
         },
       }
     )
