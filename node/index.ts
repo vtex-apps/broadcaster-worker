@@ -24,6 +24,7 @@ metrics.trackCache('segment', segmentCacheStorage)
 
 export default new Service<Clients, State, ParamsContext>({
   clients: {
+    implementation: Clients,
     options: {
       default: {
         exponentialTimeoutCoefficient: 2,
