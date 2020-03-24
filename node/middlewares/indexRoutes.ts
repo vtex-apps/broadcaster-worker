@@ -18,6 +18,7 @@ const index = async (ctx: ServiceContext) => {
         events.sendEvent('', BROADCASTER_NOTIFICATION, {
           HasStockKeepingUnitModified: true,
           IdSku: skuId,
+          alwaysNotify: true,
         })
         console.log('SKU EVENT', skuId)
         acc.push(skuId)

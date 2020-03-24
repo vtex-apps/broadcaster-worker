@@ -13,6 +13,7 @@ declare global {
   interface BroadcasterEvent {
     HasStockKeepingUnitModified: boolean
     IdSku: string
+    alwaysNotify?: boolean
   }
 
   type ID = string
