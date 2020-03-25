@@ -20,7 +20,6 @@ const index = async (ctx: ServiceContext) => {
           IdSku: skuId,
           alwaysNotify: true,
         })
-        console.log('SKU EVENT', skuId)
         acc.push(skuId)
       }
       return acc
