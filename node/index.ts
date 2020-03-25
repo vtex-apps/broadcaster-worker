@@ -1,9 +1,11 @@
-import { LRUCache, Service, Cached, IOClients, ParamsContext } from '@vtex/api'
+import { LRUCache, Service, Cached, ParamsContext } from '@vtex/api'
 
 import { locale } from './middlewares/locale'
 import { notify } from './middlewares/notify'
 import { settings } from './middlewares/settings'
 import { throttle } from './middlewares/throttle'
+import { indexRoutes } from './middlewares/indexRoutes'
+import { Clients } from './clients'
 
 const ONE_SECOND_MS = 1000
 const TREE_SECONDS_MS = 3 * 1000
@@ -20,8 +22,9 @@ const segmentCacheStorage = new LRUCache<string, Cached>({
 metrics.trackCache('tenant', tenantCacheStorage)
 metrics.trackCache('segment', segmentCacheStorage)
 
-export default new Service<IOClients, State, ParamsContext>({
+export default new Service<Clients, State, ParamsContext>({
   clients: {
+    implementation: Clients,
     options: {
       default: {
         exponentialTimeoutCoefficient: 2,
@@ -48,5 +51,8 @@ export default new Service<IOClients, State, ParamsContext>({
     broadcasterNotification: [
       throttle, settings, locale, notify,
     ],
-  }
+  },
+  routes: {
+    indexRoutes,
+  },
 })

@@ -7,8 +7,13 @@
   "workers": 4,
   "events": {
     "broadcasterNotification": {
-      "sender": "vtex.broadcaster",
       "keys": ["broadcaster.notification"]
+    }
+  },
+  "routes": {
+    "indexRoutes": {
+      "path": "/index-routes",
+      "public": false
     }
   }
 }
