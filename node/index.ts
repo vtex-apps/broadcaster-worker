@@ -7,7 +7,6 @@ import { throttle } from './middlewares/throttle'
 import { indexRoutes } from './middlewares/indexRoutes'
 import { Clients } from './clients'
 
-const ONE_SECOND_MS = 1000
 const TREE_SECONDS_MS = 3 * 1000
 const CONCURRENCY = 10
 
@@ -31,7 +30,7 @@ export default new Service<Clients, State, ParamsContext>({
         exponentialBackoffCoefficient: 2,
         initialBackoffDelay: 50,
         retries: 1,
-        timeout: ONE_SECOND_MS,
+        timeout: TREE_SECONDS_MS,
         concurrency: CONCURRENCY,
       },
       tenant: {

@@ -1,6 +1,6 @@
 import { TooManyRequestsError } from '@vtex/api'
 
-const MAX_REQUEST = 20
+const MAX_REQUEST = 10
 let COUNTER = 0
 
 export async function throttle(
