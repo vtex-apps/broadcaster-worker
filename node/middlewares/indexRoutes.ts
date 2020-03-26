@@ -26,7 +26,7 @@ const index = async (ctx: ServiceContext) => {
     }, [] as number[])
     from += PAGE_LIMIT
     to += PAGE_LIMIT
-    await sleep(300)
+    await sleep(500)
   } while(skuIds.length)
 }
 
