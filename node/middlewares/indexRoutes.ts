@@ -1,7 +1,8 @@
+import { sleep } from "../utils/event"
+
 const BROADCASTER_NOTIFICATION = 'broadcaster.notification'
 const PAGE_LIMIT = 20
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const index = async (ctx: ServiceContext) => {
   const { clients: { catalog, events}, vtex: { logger } } = ctx
