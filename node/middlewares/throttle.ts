@@ -1,7 +1,7 @@
 import { sleep } from './../utils/event';
 import { TooManyRequestsError } from '@vtex/api'
 
-const MAX_REQUEST = 1
+const MAX_REQUEST = 5
 let COUNTER = 0
 
 export async function throttle(
