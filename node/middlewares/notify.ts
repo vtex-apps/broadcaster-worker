@@ -28,16 +28,17 @@ const isStorage = (maybeStorage: {} | Storage | null): maybeStorage is Storage =
 const replaceIfChanged = async <T>(
   data: T,
   fileName: string,
+  bucket: string,
   { vbase }: IOClients
 ) => {
   const hash = objToHash(data)
 
   const oldHash = await vbase
-    .getJSON<Storage | null>(USER_BUCKET, fileName, true)
+    .getJSON<Storage | null>(bucket, fileName, true)
     .then(maybeHash => isStorage(maybeHash) ? maybeHash.hash : null)
     
   if (oldHash !== hash) {
-    await vbase.saveJSON<Storage>(USER_BUCKET, fileName, { hash })
+    await vbase.saveJSON<Storage>(bucket, fileName, { hash })
     return true
   }
 
@@ -51,9 +52,10 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
     clients: { catalogGraphQL, events },
     clients,
     state: { alwaysNotify }, 
-    body: { IdSku },
+    body: { IdSku, indexBucket },
     vtex: { production, logger },
   } = ctx
+  const bucket = indexBucket || USER_BUCKET
   const eventPromises = []
   const changedEntities: Record<string, 1> = {}
   const logWholeProductAndSku = {sku: {}, product: {}}
@@ -65,7 +67,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   }
   const { sku } = skuResponse
   const filenameSku = providerToVbaseFilename(toSkuProvider(sku.id))
-  let changed = await replaceIfChanged(sku, filenameSku, clients)
+  let changed = await replaceIfChanged(sku, filenameSku, bucket, clients)
   if (alwaysNotify || changed) {
     logWholeProductAndSku.sku = sku
     eventPromises.push(events.sendEvent('', skuChanged, sku))
@@ -81,7 +83,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   const filenameProduct = providerToVbaseFilename(
     toProductProvider(sku.productId)
   )
-  changed = await replaceIfChanged(product, filenameProduct, clients)
+  changed = await replaceIfChanged(product, filenameProduct, bucket, clients)
   if (alwaysNotify || changed) {
     logWholeProductAndSku.product = product
     eventPromises.push(events.sendEvent('', productChanged, product))
@@ -97,7 +99,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   const filenameBrand = providerToVbaseFilename(
     toBrandProvider(product.brandId)
   )
-  changed = await replaceIfChanged(brand, filenameBrand, clients)
+  changed = await replaceIfChanged(brand, filenameBrand, bucket, clients)
   if (alwaysNotify || changed) {
     eventPromises.push(events.sendEvent('', brandChanged, brand))
     changedEntities.brand = 1
@@ -112,7 +114,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   const filenameCategory = providerToVbaseFilename(
     toCategoryProvider(category.id)
   )
-  changed = await replaceIfChanged(category, filenameCategory, clients)
+  changed = await replaceIfChanged(category, filenameCategory, bucket, clients)
   if (alwaysNotify || changed) {
     eventPromises.push(events.sendEvent('', categoryChanged, category))
     changedEntities.category = 1

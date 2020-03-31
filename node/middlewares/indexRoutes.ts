@@ -9,6 +9,8 @@ const index = async (ctx: ServiceContext) => {
   let from = 0
   let to = PAGE_LIMIT - 1
   let totalProcessedProducts = 0
+  const indexBucket = (Math.random() * 10000).toString()
+  console.log('indexBucket', indexBucket)
   do {
     const { data } = await catalog.getProductsAndSkuIds(from, to)
     const productIds = Object.keys(data)
@@ -21,12 +23,13 @@ const index = async (ctx: ServiceContext) => {
       }
       return acc
     }, [] as number[])
-    for (let skuId in skuIds) {
+    for (let idx in skuIds) {
+      const skuId = skuIds[idx]
       await sleep(300)
       events.sendEvent('', BROADCASTER_NOTIFICATION, {
         HasStockKeepingUnitModified: true,
         IdSku: skuId,
-        alwaysNotify: true,
+        indexBucket,
       })
     }
     from += PAGE_LIMIT
