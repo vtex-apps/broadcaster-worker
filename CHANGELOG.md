@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Feature
 - Removes always notify setting
+- Validate indexation requests
 
 ## [0.1.2] - 2020-04-01
 ### Fixed
