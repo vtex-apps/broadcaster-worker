@@ -20,7 +20,7 @@ export async function settings(ctx: Context, next: () => Promise<any>) {
 
   const { alwaysNotify } = await apps.getAppSettings(VTEX_APP_AT_MAJOR).then(parseSettings)
 
-  ctx.state.alwaysNotify = ctx.body.alwaysNotify || alwaysNotify
+  ctx.state.alwaysNotify = alwaysNotify
   
   await next()
 }

@@ -43,6 +43,9 @@ export default new Service<Clients, State, ParamsContext>({
       },
       events: {
         timeout: TREE_SECONDS_MS
+      },
+      vbase: {
+        concurrency: 5,
       }
     },
   },

@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Decreases MAX # REQUESTS
+- Decreases number of workers
+- Decreases number of products in one request
+- Decreases max Replicas
+- Returns 429 after waiting a random amount of time
 
 ## [0.1.1] - 2020-03-26
 ### Fixed
