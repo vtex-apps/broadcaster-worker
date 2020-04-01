@@ -5,6 +5,7 @@ import { notify } from './middlewares/notify'
 import { throttle } from './middlewares/throttle'
 import { indexRoutes } from './middlewares/indexRoutes'
 import { Clients } from './clients'
+import { validation } from './middlewares/validation'
 
 const TREE_SECONDS_MS = 3 * 1000
 const CONCURRENCY = 10
@@ -54,6 +55,6 @@ export default new Service<Clients, State, ParamsContext>({
     ],
   },
   routes: {
-    indexRoutes,
+    indexRoutes: [validation, indexRoutes],
   },
 })
