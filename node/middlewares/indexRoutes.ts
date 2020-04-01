@@ -12,6 +12,10 @@ const index = async (ctx: ServiceContext) => {
   const indexBucket = (Math.random() * 10000).toString()
   do {
     const { data } = await catalog.getProductsAndSkuIds(from, to)
+      .catch(err => {
+        logger.error(err) 
+        return { data: {} as Record<string, number[]> }
+      })
     const productIds = Object.keys(data)
     skuIds = productIds.reduce((acc, productId) => {
       const skus = data[productId]
@@ -29,7 +33,7 @@ const index = async (ctx: ServiceContext) => {
         HasStockKeepingUnitModified: true,
         IdSku: skuId,
         indexBucket,
-      })
+      }).catch(logger.error)
     }
     from += PAGE_LIMIT
     to += PAGE_LIMIT
