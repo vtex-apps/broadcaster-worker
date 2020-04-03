@@ -30,6 +30,6 @@ export async function validation(ctx: ServiceContext, next: () => Promise<void>)
     return 
   }
 
-  ctx.status = 420 
+  ctx.status = 429
   ctx.body = `A Indexation has already been done in the last hour. Next indexation available after ${nextIndexation}.`
 }
