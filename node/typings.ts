@@ -6,7 +6,6 @@ declare global {
   type ServiceContext = ServiceCtx<Clients, State, ParamsContext>
 
   interface State extends RecorderState, BroadcasterEvent {
-    alwaysNotify: boolean
     payload: BroadcasterEvent
   }
 

@@ -51,7 +51,6 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   const {
     clients: { catalogGraphQL, events },
     clients,
-    state: { alwaysNotify }, 
     body: { IdSku, indexBucket },
     vtex: { production, logger },
   } = ctx
@@ -68,7 +67,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   const { sku } = skuResponse
   const filenameSku = providerToVbaseFilename(toSkuProvider(sku.id))
   let changed = await replaceIfChanged(sku, filenameSku, bucket, clients)
-  if (alwaysNotify || changed) {
+  if (changed) {
     logWholeProductAndSku.sku = sku
     eventPromises.push(events.sendEvent('', skuChanged, sku))
     changedEntities.sku = 1
@@ -84,7 +83,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
     toProductProvider(sku.productId)
   )
   changed = await replaceIfChanged(product, filenameProduct, bucket, clients)
-  if (alwaysNotify || changed) {
+  if (changed) {
     logWholeProductAndSku.product = product
     eventPromises.push(events.sendEvent('', productChanged, product))
     changedEntities.product = 1
@@ -100,7 +99,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
     toBrandProvider(product.brandId)
   )
   changed = await replaceIfChanged(brand, filenameBrand, bucket, clients)
-  if (alwaysNotify || changed) {
+  if (changed) {
     eventPromises.push(events.sendEvent('', brandChanged, brand))
     changedEntities.brand = 1
   }
@@ -115,7 +114,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
     toCategoryProvider(category.id)
   )
   changed = await replaceIfChanged(category, filenameCategory, bucket, clients)
-  if (alwaysNotify || changed) {
+  if (changed) {
     eventPromises.push(events.sendEvent('', categoryChanged, category))
     changedEntities.category = 1
   }
