@@ -1,3 +1,4 @@
+import { Category } from '@vtex/api/lib/clients/apps/catalogGraphQL/category'
 import { RecorderState, EventContext, ServiceContext as ServiceCtx, ParamsContext } from '@vtex/api'
 import { Clients } from './clients/index'
 
@@ -13,6 +14,10 @@ declare global {
     HasStockKeepingUnitModified: boolean
     IdSku: string
     indexBucket?: string
+  }
+
+  interface IdentifiedCategory extends Category {
+    parentsNames: string[]
   }
 
   type ID = string
