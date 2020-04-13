@@ -1,4 +1,4 @@
-import { IOContext, IOClients } from '@vtex/api'
+import { IOClients, LINKED} from '@vtex/api'
 import { isEmpty, isNil } from 'ramda'
 
 import { USER_BUCKET } from '../constants'
@@ -46,11 +46,11 @@ const replaceIfChanged = async <T>(
 }
 
 const getAllCategories = async (categoryId: string | undefined, ctx: Context): Promise<IdentifiedCategory[]> => {
-  const { clients: { catalogGraphQL }, vtex: { logger }} = ctx
+  const { clients: { catalogGraphQL } } = ctx
   if (!categoryId) {
     return []
   }
-  const categoryResponse = await catalogGraphQL.category(categoryId).catch(logError(logger))
+  const categoryResponse = await catalogGraphQL.category(categoryId)
   if (!categoryResponse || !categoryResponse.category) {
     return []
   }
@@ -63,8 +63,6 @@ const getAllCategories = async (categoryId: string | undefined, ctx: Context): P
   }
   return [identifiedCategory, ...categories]
 }
-
-const logError = (logger: IOContext['logger']) => (err: any) => logger.error(err)
 
 export async function notify(ctx: Context, next: () => Promise<any>) {
   const {
@@ -79,7 +77,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   const logWholeProductAndSku = {sku: {}, product: {}}
 
   // Modification in SKU
-  const skuResponse = await catalogGraphQL.sku(IdSku).catch(logError(logger))
+  const skuResponse = await catalogGraphQL.sku(IdSku)
   if (!skuResponse || !skuResponse.sku) {
     return
   }
@@ -93,7 +91,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   }
 
   // Modification in Product
-  const productResponse = await catalogGraphQL.product(sku.productId).catch(logError(logger))
+  const productResponse = await catalogGraphQL.product(sku.productId)
   if (!productResponse || !productResponse.product) {
     return
   }
@@ -109,7 +107,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   }
 
   // Modification in Brand
-  const brandResponse = await catalogGraphQL.brand(product.brandId).catch(logError(logger))
+  const brandResponse = await catalogGraphQL.brand(product.brandId)
   if (!brandResponse || !brandResponse.brand) {
     return
   }
@@ -126,9 +124,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   // Modification in Categories
   const categories = await getAllCategories(product.categoryId, ctx)
   const changedCategoriesIds: string[] = []
-  changedEntities.categories = 0
-  for (let idx in categories) {
-    const category = categories[idx]
+  for (const category of categories) {
     const filenameCategory = providerToVbaseFilename(
       toCategoryProvider(category.id)
     )
@@ -136,16 +132,16 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
     if (changed) {
       changedCategoriesIds.push(category.id)
       eventPromises.push(events.sendEvent('', categoryChanged, category))
-      changedEntities.categories += 1
     }
   }
+  changedEntities.categories = changedCategoriesIds.length
 
   // Wait for all events to be sent
   await Promise.all(eventPromises)
 
   metrics.batch('changed-entities', undefined, changedEntities)
 
-  if (!isEmpty(logWholeProductAndSku.sku) && !isEmpty(logWholeProductAndSku.product)) {
+  if (LINKED) {
     logger.debug({
       'sku': logWholeProductAndSku.sku,
       'product': logWholeProductAndSku.product
