@@ -17,7 +17,7 @@ declare global {
   }
 
   interface IdentifiedCategory extends Category {
-    parentsNames: string[]
+    parents: Pick<Category, 'name' | 'id'>[]
   }
 
   type ID = string

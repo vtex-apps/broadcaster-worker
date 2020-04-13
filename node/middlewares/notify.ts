@@ -56,12 +56,11 @@ const getAllCategories = async (categoryId: string | undefined, ctx: Context): P
   }
   const { category } = categoryResponse
   const categories = await getAllCategories(category.parentCategoryId, ctx)
-  const parentCategory = categories[0]
   const identifiedCategory = {
     ...category,
-    parentsNames:  parentCategory ? [...parentCategory.parentsNames, parentCategory.name] : []
+    parents: categories.map(c => ({id: c.id, name: c.name}))
   }
-  return [identifiedCategory, ...categories]
+  return [...categories, identifiedCategory]
 }
 
 export async function notify(ctx: Context, next: () => Promise<any>) {
