@@ -1,5 +1,6 @@
-import { IOContext, IOClients } from '@vtex/api'
-import { isEmpty, isNil } from 'ramda'
+import { Clients } from './../clients/index';
+import { IOContext, IOClients, CatalogGraphQL } from '@vtex/api'
+import { isEmpty, isNil, pluck } from 'ramda'
 
 import { USER_BUCKET } from '../constants'
 import {
@@ -17,6 +18,7 @@ import {
   productChanged,
   skuChanged,
 } from './../utils/event'
+import { Category } from '@vtex/api/lib/clients/apps/catalogGraphQL/category'
 
 const isStorage = (maybeStorage: {} | Storage | null): maybeStorage is Storage => {
   if (isNil(maybeStorage) || isEmpty(maybeStorage)) {
@@ -45,6 +47,25 @@ const replaceIfChanged = async <T>(
   return false
 }
 
+const getAllCategories = async (categoryId: string | undefined, ctx: Context): Promise<IdentifiedCategory[]> => {
+  const { clients: { catalogGraphQL }, vtex: logger } = ctx
+  if (!categoryId) {
+    return []
+  }
+  const categoryResponse = await catalogGraphQL.category(categoryId).catch(logError(logger))
+  if (!categoryResponse || !categoryResponse.category) {
+    return []
+  }
+  const { category } = categoryResponse
+  const categories = await getAllCategories(category.parentCategoryId, ctx)
+  const parentCategory = categories[0]
+  const identifiedCategory = {
+    ...category,
+    parentsNames: [...parentCategory.parentsNames, parentCategory.name]
+  }
+  return [identifiedCategory, ...categories]
+}
+
 const logError = (logger: IOContext['logger']) => (err: any) => logger.error(err)
 
 export async function notify(ctx: Context, next: () => Promise<any>) {
@@ -56,7 +77,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   } = ctx
   const bucket = indexBucket || USER_BUCKET
   const eventPromises = []
-  const changedEntities: Record<string, 1> = {}
+  const changedEntities: Record<string, number> = {}
   const logWholeProductAndSku = {sku: {}, product: {}}
 
   // Modification in SKU
@@ -102,21 +123,23 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   if (changed) {
     eventPromises.push(events.sendEvent('', brandChanged, brand))
     changedEntities.brand = 1
-  }
+  } 
 
-  // Modification in Category
-  const categoryResponse = await catalogGraphQL.category(product.categoryId).catch(logError(logger))
-  if (!categoryResponse || !categoryResponse.category) {
-    return
-  }
-  const { category } = categoryResponse
-  const filenameCategory = providerToVbaseFilename(
-    toCategoryProvider(category.id)
-  )
-  changed = await replaceIfChanged(category, filenameCategory, bucket, clients)
-  if (changed) {
-    eventPromises.push(events.sendEvent('', categoryChanged, category))
-    changedEntities.category = 1
+  // Modification in Categories
+  const categories = await getAllCategories(product.categoryId, ctx)
+  const changedCategoriesIds: string[] = []
+  changedEntities.categories = 0
+  for (let idx in categories) {
+    const category = categories[idx]
+    const filenameCategory = providerToVbaseFilename(
+      toCategoryProvider(category.id)
+    )
+    changed = await replaceIfChanged(category, filenameCategory, bucket, clients)
+    if (changed) {
+      changedCategoriesIds.push(category.id)
+      eventPromises.push(events.sendEvent('', categoryChanged, category))
+      changedEntities.categories += 1
+    }
   }
 
   // Wait for all events to be sent
@@ -124,7 +147,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
 
   metrics.batch('changed-entities', undefined, changedEntities)
 
-  if(!isEmpty(logWholeProductAndSku.sku) && !isEmpty(logWholeProductAndSku.product)) {
+  if (!isEmpty(logWholeProductAndSku.sku) && !isEmpty(logWholeProductAndSku.product)) {
     logger.debug({
       'sku': logWholeProductAndSku.sku,
       'product': logWholeProductAndSku.product
@@ -132,7 +155,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   }
 
   if (!production) {
-    console.log('changedEntities', changedEntities, {sku: sku.id, brand: brand.id, product: product.id, category: category.id})
+    console.log('changedEntities', changedEntities, { sku: sku.id, brand: brand.id, product: product.id, categories: changedCategoriesIds})
   }
 
   await next()
