@@ -1,6 +1,5 @@
-import { Clients } from './../clients/index';
-import { IOContext, IOClients, CatalogGraphQL } from '@vtex/api'
-import { isEmpty, isNil, pluck } from 'ramda'
+import { IOContext, IOClients } from '@vtex/api'
+import { isEmpty, isNil } from 'ramda'
 
 import { USER_BUCKET } from '../constants'
 import {
@@ -18,7 +17,6 @@ import {
   productChanged,
   skuChanged,
 } from './../utils/event'
-import { Category } from '@vtex/api/lib/clients/apps/catalogGraphQL/category'
 
 const isStorage = (maybeStorage: {} | Storage | null): maybeStorage is Storage => {
   if (isNil(maybeStorage) || isEmpty(maybeStorage)) {
@@ -48,7 +46,7 @@ const replaceIfChanged = async <T>(
 }
 
 const getAllCategories = async (categoryId: string | undefined, ctx: Context): Promise<IdentifiedCategory[]> => {
-  const { clients: { catalogGraphQL }, vtex: logger } = ctx
+  const { clients: { catalogGraphQL }, vtex: { logger }} = ctx
   if (!categoryId) {
     return []
   }
@@ -61,7 +59,7 @@ const getAllCategories = async (categoryId: string | undefined, ctx: Context): P
   const parentCategory = categories[0]
   const identifiedCategory = {
     ...category,
-    parentsNames: [...parentCategory.parentsNames, parentCategory.name]
+    parentsNames:  parentCategory ? [...parentCategory.parentsNames, parentCategory.name] : []
   }
   return [identifiedCategory, ...categories]
 }
