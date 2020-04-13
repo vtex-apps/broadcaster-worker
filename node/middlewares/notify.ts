@@ -141,14 +141,14 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
 
   metrics.batch('changed-entities', undefined, changedEntities)
 
-  if (LINKED) {
+  if (!isEmpty(logWholeProductAndSku.sku) && !isEmpty(logWholeProductAndSku.product)) {
     logger.debug({
       'sku': logWholeProductAndSku.sku,
       'product': logWholeProductAndSku.product
     })
   }
 
-  if (!production) {
+  if (LINKED) {
     console.log('changedEntities', changedEntities, { sku: sku.id, brand: brand.id, product: product.id, categories: changedCategoriesIds})
   }
 
