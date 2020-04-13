@@ -69,7 +69,7 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
     clients: { catalogGraphQL, events },
     clients,
     body: { IdSku, indexBucket },
-    vtex: { production, logger },
+    vtex: { logger },
   } = ctx
   const bucket = indexBucket || USER_BUCKET
   const eventPromises = []
