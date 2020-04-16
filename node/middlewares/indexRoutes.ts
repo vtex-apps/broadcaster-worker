@@ -37,7 +37,7 @@ const index = async (ctx: ServiceContext) => {
     }
     from += PAGE_LIMIT
     to += PAGE_LIMIT
-    await sleep(1000)
+    await sleep(6000)
   } while(skuIds.length)
   logger.info(`Indexation of ${totalProcessedProducts} products complete`)
 }
