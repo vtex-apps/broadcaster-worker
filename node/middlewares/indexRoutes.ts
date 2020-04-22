@@ -8,21 +8,21 @@ const index = async (ctx: ServiceContext) => {
   let skuIds: number[] = []
   let from = 0
   let to = PAGE_LIMIT - 1
-  let totalProcessedProducts = 0
+  let processedProducts = 0
+  let totalProducts
   const indexBucket = (Math.random() * 10000).toString()
   do {
-    const { data } = await catalog.getProductsAndSkuIds(from, to)
-      .catch(err => {
-        logger.error(err) 
-        return { data: {} as Record<string, number[]> }
-      })
+    const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to)
+    if (!totalProducts) {
+      totalProducts = total
+    }
     const productIds = Object.keys(data)
     skuIds = productIds.reduce((acc, productId) => {
       const skus = data[productId]
       if (skus.length) {
         const skuId = skus[0]
         acc.push(skuId)
-        totalProcessedProducts += 1
+        processedProducts += 1
       }
       return acc
     }, [] as number[])
@@ -38,8 +38,8 @@ const index = async (ctx: ServiceContext) => {
     from += PAGE_LIMIT
     to += PAGE_LIMIT
     await sleep(6000)
-  } while(skuIds.length)
-  logger.info(`Indexation of ${totalProcessedProducts} products complete`)
+  } while(processedProducts < totalProducts && from < totalProducts)
+  logger.info(`Indexation of ${processedProducts} products complete`)
 }
 
 export function indexRoutes(ctx: ServiceContext) {
