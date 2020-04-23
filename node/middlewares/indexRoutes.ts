@@ -41,7 +41,7 @@ const index = async (ctx: ServiceContext) => {
     }
     from += PAGE_LIMIT
     to += PAGE_LIMIT
-    await sleep(6000)
+    await sleep(6050)
   } while(processedProducts < totalProducts && from < totalProducts)
   logger.info({ message: `Indexation complete`, processedProducts, productsWithoutSKU })
 }
