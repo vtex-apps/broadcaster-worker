@@ -9,7 +9,9 @@ const index = async (ctx: ServiceContext) => {
   let from = 0
   let to = PAGE_LIMIT - 1
   let processedProducts = 0
+  let productsWithoutSKU = 0
   let totalProducts
+
   const indexBucket = (Math.random() * 10000).toString()
   do {
     const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to)
@@ -23,6 +25,8 @@ const index = async (ctx: ServiceContext) => {
         const skuId = skus[0]
         acc.push(skuId)
         processedProducts += 1
+      } else {
+        productsWithoutSKU += 1
       }
       return acc
     }, [] as number[])
@@ -39,14 +43,14 @@ const index = async (ctx: ServiceContext) => {
     to += PAGE_LIMIT
     await sleep(6000)
   } while(processedProducts < totalProducts && from < totalProducts)
-  logger.info(`Indexation of ${processedProducts} products complete`)
+  logger.info({ message: `Indexation complete`, processedProducts, productsWithoutSKU })
 }
 
 export function indexRoutes(ctx: ServiceContext) {
   const { adminUserAuthToken, logger } = ctx.vtex
   if (!adminUserAuthToken) {
     ctx.status = 401
-    logger.error(`Missiing adminUserAuth token`)
+    logger.error(`Missing adminUserAuth token`)
     return
   }
   index(ctx)
