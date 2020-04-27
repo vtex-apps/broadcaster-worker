@@ -39,9 +39,10 @@ const index = async (ctx: ServiceContext) => {
         indexBucket,
       }).catch(logger.error)
     }
+    logger.info({ message: 'Processed', processedProducts, productsWithoutSKU, totalProducts, from })
     from += PAGE_LIMIT
     to += PAGE_LIMIT
-    await sleep(6050)
+    await sleep(6200)
   } while(processedProducts < totalProducts && from < totalProducts)
   logger.info({ message: `Indexation complete`, processedProducts, productsWithoutSKU })
 }
