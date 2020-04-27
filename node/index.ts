@@ -3,7 +3,7 @@ import { LRUCache, Service, Cached, ParamsContext } from '@vtex/api'
 import { locale } from './middlewares/locale'
 import { notify } from './middlewares/notify'
 import { throttle } from './middlewares/throttle'
-import { indexRoutes } from './middlewares/indexRoutes'
+import { indexRoutes, indexAllRoutes } from './middlewares/indexRoutes'
 import { Clients } from './clients'
 import { validation } from './middlewares/validation'
 
@@ -53,8 +53,9 @@ export default new Service<Clients, State, ParamsContext>({
     broadcasterNotification: [
       throttle, locale, notify,
     ],
+    indexRoutes: indexRoutes,
   },
   routes: {
-    indexRoutes: [validation, indexRoutes],
+    indexRoutes: [validation, indexAllRoutes],
   },
 })

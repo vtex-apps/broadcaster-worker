@@ -140,12 +140,12 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
 
   metrics.batch('changed-entities', undefined, changedEntities)
 
-  if (!isEmpty(logWholeProductAndSku.sku) && !isEmpty(logWholeProductAndSku.product)) {
-    logger.debug({
-      'sku': logWholeProductAndSku.sku,
-      'product': logWholeProductAndSku.product
-    })
-  }
+  // if (!isEmpty(logWholeProductAndSku.sku) && !isEmpty(logWholeProductAndSku.product)) {
+  //   logger.debug({
+  //     'sku': logWholeProductAndSku.sku,
+  //     'product': logWholeProductAndSku.product
+  //   })
+  // }
 
   if (LINKED) {
     console.log('changedEntities', changedEntities, { sku: sku.id, brand: brand.id, product: product.id, categories: changedCategoriesIds})
