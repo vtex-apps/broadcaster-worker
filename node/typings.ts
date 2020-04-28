@@ -20,6 +20,7 @@ declare global {
     from: number
     processedProducts: number
     productsWithoutSKU: number
+    attempt?: number
   }
 
   interface IdentifiedCategory extends Category {

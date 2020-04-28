@@ -3,6 +3,7 @@ import { sleep } from '../utils/event'
 const BROADCASTER_NOTIFICATION = 'broadcaster.notification'
 const BROACASTER_INDEX_ROUTES = 'broadcaster.indexRoutes'
 const PAGE_LIMIT = 20
+const MAX_ATTEMPTS = 3
 const BUCKET = 'indexRoutes'
 const FILE = 'data.json'
 
@@ -72,9 +73,14 @@ const index = async (ctx: Context) => {
 }
 
 export function indexRoutes(ctx: Context) {
-  const { logger } = ctx.vtex
+  const { clients: { events }, vtex: { logger } } = ctx
   index(ctx).catch(error => {
-    logger.error({ message: 'Indexation failed', error, payload: ctx.body })
+    const payload: IndexRoutesEvent = ctx.body
+    logger.error({ message: 'Indexation failed', error, payload })
+    if (payload.attempt && payload.attempt < MAX_ATTEMPTS) {
+      payload.attempt = (payload.attempt || 0) + 1
+      sleep(200**payload.attempt).then(() => events.sendEvent('', BROACASTER_INDEX_ROUTES, payload))
+    }
   })
 }
 
