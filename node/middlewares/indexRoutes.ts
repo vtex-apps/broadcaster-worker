@@ -73,13 +73,19 @@ const index = async (ctx: Context) => {
 }
 
 export function indexRoutes(ctx: Context) {
-  const { clients: { events }, vtex: { logger } } = ctx
+  const { clients: { events, vbase }, vtex: { logger } } = ctx
   index(ctx).catch(error => {
     const payload: IndexRoutesEvent = ctx.body
     logger.error({ message: 'Indexation failed', error, payload })
-    if (payload.attempt && payload.attempt < MAX_ATTEMPTS) {
+    if (payload.attempt || 0 < MAX_ATTEMPTS) {
       payload.attempt = (payload.attempt || 0) + 1
-      sleep(200**payload.attempt).then(() => events.sendEvent('', BROACASTER_INDEX_ROUTES, payload))
+      sleep(200 ** payload.attempt).then(() => 
+        events.sendEvent('', BROACASTER_INDEX_ROUTES, payload)
+      )
+    } else {
+      vbase.deleteFile(BUCKET, FILE).then(() => 
+        logger.info({ message: 'Indexation ended', payload })
+      )
     }
   })
 }
