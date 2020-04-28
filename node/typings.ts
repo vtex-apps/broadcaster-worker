@@ -20,7 +20,6 @@ declare global {
     from: number
     processedProducts: number
     productsWithoutSKU: number
-    authToken: string
   }
 
   interface IdentifiedCategory extends Category {

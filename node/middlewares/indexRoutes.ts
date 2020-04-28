@@ -3,22 +3,31 @@ import { sleep } from '../utils/event'
 const BROADCASTER_NOTIFICATION = 'broadcaster.notification'
 const BROACASTER_INDEX_ROUTES = 'broadcaster.indexRoutes'
 const PAGE_LIMIT = 20
+const BUCKET = 'indexRoutes'
+const FILE = 'data.json'
 
-export async function indexRoutes(ctx: Context) {
-  const { clients: { catalog, events }, vtex: { logger }, body } = ctx
-  const { 
+const index = async (ctx: Context) => {
+  const { clients: { catalog, events, vbase }, vtex: { logger }, body } = ctx
+  const {
     indexBucket,
     from,
     processedProducts,
     productsWithoutSKU,
-    authToken,
   }: IndexRoutesEvent = body
-  const to = from + PAGE_LIMIT - 1
-  const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
-  if (processedProducts >= total || from >= total) {
-    logger.info({ message: `Indexation complete`, processedProducts, productsWithoutSKU, total, indexBucket })
+
+  const dataFile = await vbase.getJSON<{ indexBucket: string, authToken: string }>(BUCKET, FILE, true)
+  if (dataFile?.indexBucket != indexBucket) {
+    logger.debug({ 
+      message: 'Invalid Indexation', 
+      currentIndexBucket: dataFile?.indexBucket, 
+      receivedIndexBucket: indexBucket
+    })
     return
   }
+
+  const { authToken } = dataFile
+  const to = from + PAGE_LIMIT - 1
+  const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
 
   const productIds = Object.keys(data)
   const skuIds = productIds.reduce((acc, productId) => {
@@ -26,7 +35,7 @@ export async function indexRoutes(ctx: Context) {
     if (skus.length) {
       const skuId = skus[0]
       acc.push(skuId)
-    } 
+    }
     return acc
   }, [] as number[])
   for (let idx in skuIds) {
@@ -41,38 +50,52 @@ export async function indexRoutes(ctx: Context) {
   await sleep(6200)
   const payload: IndexRoutesEvent = {
     indexBucket,
-    from: from + PAGE_LIMIT, 
+    from: from + PAGE_LIMIT,
     processedProducts: processedProducts + skuIds.length,
     productsWithoutSKU: productsWithoutSKU + PAGE_LIMIT - skuIds.length,
-    authToken,
-  } 
-  logger.info({ 
-    message: 'Processed', 
-    processedProducts: payload.processedProducts, 
-    productsWithoutSKU: payload.productsWithoutSKU, 
-    totalProducts: total, 
-    from, 
-    indexBucket,
-  })
-  events.sendEvent('', BROACASTER_INDEX_ROUTES, payload)
+  }
+  if (payload.processedProducts >= total || payload.from >= total) {
+    logger.info({ message: `Indexation complete`, processedProducts, productsWithoutSKU, total, indexBucket })
+    await vbase.deleteFile(BUCKET, FILE)
+    return
+  } else {
+    logger.info({
+      message: 'Processed',
+      processedProducts: payload.processedProducts,
+      productsWithoutSKU: payload.productsWithoutSKU,
+      totalProducts: total,
+      from,
+      indexBucket,
+    })
+    events.sendEvent('', BROACASTER_INDEX_ROUTES, payload)
+  }
 }
 
-export function indexAllRoutes(ctx: ServiceContext) {
-  const { clients: { events }, vtex: { adminUserAuthToken, logger } } = ctx
+export function indexRoutes(ctx: Context) {
+  const { logger } = ctx.vtex
+  index(ctx).catch(error => {
+    logger.error({ message: 'Indexation failed', error, payload: ctx.body })
+  })
+}
+
+export async function indexAllRoutes(ctx: ServiceContext) {
+  const { clients: { events, vbase }, vtex: { adminUserAuthToken, logger } } = ctx
   if (!adminUserAuthToken) {
     ctx.status = 401
     logger.error(`Missing adminUserAuth token`)
     return
   }
-  // ADD indexBucket and token in VBASE?
-
   const indexBucket = (Math.random() * 10000).toString()
+  await vbase.saveJSON(BUCKET, FILE, {
+    indexBucket,
+    authToken: adminUserAuthToken,
+  })
+
   const payload: IndexRoutesEvent = {
     indexBucket,
     from: 0,
     processedProducts: 0,
     productsWithoutSKU: 0,
-    authToken: adminUserAuthToken, // ISSO é SEGUTRO?
   }
   events.sendEvent('', BROACASTER_INDEX_ROUTES, payload)
   ctx.status = 200
