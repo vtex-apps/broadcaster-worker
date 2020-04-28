@@ -53,7 +53,7 @@ export default new Service<Clients, State, ParamsContext>({
     broadcasterNotification: [
       throttle, locale, notify,
     ],
-    indexRoutes: indexRoutes,
+    indexRoutes,
   },
   routes: {
     indexRoutes: [validation, indexAllRoutes],
