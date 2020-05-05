@@ -6,6 +6,7 @@ import { throttle } from './middlewares/throttle'
 import { indexRoutes, indexAllRoutes } from './middlewares/indexRoutes'
 import { Clients } from './clients'
 import { validation } from './middlewares/validation'
+import { nextEvent } from './middlewares/nextEvent'
 
 const TREE_SECONDS_MS = 3 * 1000
 const CONCURRENCY = 10
@@ -53,7 +54,7 @@ export default new Service<Clients, State, ParamsContext>({
     broadcasterNotification: [
       throttle, locale, notify,
     ],
-    indexRoutes,
+    indexRoutes: [indexRoutes, nextEvent],
   },
   routes: {
     indexRoutes: [validation, indexAllRoutes],

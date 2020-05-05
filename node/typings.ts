@@ -7,6 +7,7 @@ declare global {
   type ServiceContext = ServiceCtx<Clients, State, ParamsContext>
 
   interface State extends RecorderState, BroadcasterEvent, IndexRoutesEvent {
+    nextPayload: IndexRoutesEvent
   }
 
   interface BroadcasterEvent {

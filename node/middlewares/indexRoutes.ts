@@ -1,14 +1,14 @@
 import { sleep } from '../utils/event'
 
+export const BROACASTER_INDEX_ROUTES = 'broadcaster.indexRoutes'
 const BROADCASTER_NOTIFICATION = 'broadcaster.notification'
-const BROACASTER_INDEX_ROUTES = 'broadcaster.indexRoutes'
-const PAGE_LIMIT = 20
-// const MAX_ATTEMPTS = 3
+const PAGE_LIMIT = 10
 const BUCKET = 'indexRoutes'
 const FILE = 'data.json'
 
-const index = async (ctx: Context) => {
+const index = async (ctx: Context, next: () => Promise<void>) => {
   const { clients: { catalog, events, vbase }, vtex: { logger }, body } = ctx
+  logger.info({ message: 'Event received', payload: ctx.body})
   const {
     indexBucket,
     from,
@@ -29,6 +29,7 @@ const index = async (ctx: Context) => {
   const { authToken } = dataFile
   const to = from + PAGE_LIMIT - 1
   const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
+  let countProductsWithoutSKU = 0
 
   const productIds = Object.keys(data)
   const skuIds = productIds.reduce((acc, productId) => {
@@ -36,6 +37,8 @@ const index = async (ctx: Context) => {
     if (skus.length) {
       const skuId = skus[0]
       acc.push(skuId)
+    } else {
+      countProductsWithoutSKU++
     }
     return acc
   }, [] as number[])
@@ -53,8 +56,9 @@ const index = async (ctx: Context) => {
     indexBucket,
     from: from + PAGE_LIMIT,
     processedProducts: processedProducts + skuIds.length,
-    productsWithoutSKU: productsWithoutSKU + PAGE_LIMIT - skuIds.length,
+    productsWithoutSKU: productsWithoutSKU + countProductsWithoutSKU,
   }
+  ctx.state.nextPayload = payload
   if (payload.processedProducts >= total || payload.from >= total) {
     logger.info({ 
       message: `Indexation complete`, 
@@ -74,16 +78,15 @@ const index = async (ctx: Context) => {
       from,
       indexBucket,
     })
-    events.sendEvent('', BROACASTER_INDEX_ROUTES, payload)
-    logger.info({ message: 'Event sent', payload })
+
+    await next()
   }
 }
 
-export async function indexRoutes(ctx: Context) {
+export async function indexRoutes(ctx: Context, next: () => Promise<void>) {
   const { vtex: { logger } } = ctx
-  logger.info({ message: 'Event received', payload: ctx.body})
   try {
-    await index(ctx)
+    await index(ctx, next)
   } catch (error) {
     logger.error({ message: 'Indexation error', error, payload: ctx.body})
     throw error
