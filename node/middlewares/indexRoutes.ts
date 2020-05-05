@@ -56,7 +56,13 @@ const index = async (ctx: Context) => {
     productsWithoutSKU: productsWithoutSKU + PAGE_LIMIT - skuIds.length,
   }
   if (payload.processedProducts >= total || payload.from >= total) {
-    logger.info({ message: `Indexation complete`, processedProducts, productsWithoutSKU, total, indexBucket })
+    logger.info({ 
+      message: `Indexation complete`, 
+      processedProducts: payload.processedProducts, 
+      productsWithoutSKU: payload.productsWithoutSKU, 
+      total, 
+      indexBucket 
+    })
     await vbase.deleteFile(BUCKET, FILE)
     return
   } else {
