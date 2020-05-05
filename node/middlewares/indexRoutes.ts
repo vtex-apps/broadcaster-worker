@@ -3,7 +3,7 @@ import { sleep } from '../utils/event'
 const BROADCASTER_NOTIFICATION = 'broadcaster.notification'
 const BROACASTER_INDEX_ROUTES = 'broadcaster.indexRoutes'
 const PAGE_LIMIT = 20
-const MAX_ATTEMPTS = 3
+// const MAX_ATTEMPTS = 3
 const BUCKET = 'indexRoutes'
 const FILE = 'data.json'
 
@@ -39,16 +39,16 @@ const index = async (ctx: Context) => {
     }
     return acc
   }, [] as number[])
+  
   for (let idx in skuIds) {
     const skuId = skuIds[idx]
-    await sleep(300)
+    await sleep(50)
     events.sendEvent('', BROADCASTER_NOTIFICATION, {
       HasStockKeepingUnitModified: true,
       IdSku: skuId,
       indexBucket,
     })
   }
-  await sleep(6200)
   const payload: IndexRoutesEvent = {
     indexBucket,
     from: from + PAGE_LIMIT,
@@ -75,25 +75,19 @@ const index = async (ctx: Context) => {
       indexBucket,
     })
     events.sendEvent('', BROACASTER_INDEX_ROUTES, payload)
+    logger.info({ message: 'Event sent', payload })
   }
 }
 
-export function indexRoutes(ctx: Context) {
-  const { clients: { events, vbase }, vtex: { logger } } = ctx
-  index(ctx).catch(error => {
-    const payload: IndexRoutesEvent = ctx.body
-    logger.error({ message: 'Indexation failed', error, payload })
-    if (payload.attempt || 0 < MAX_ATTEMPTS) {
-      payload.attempt = (payload.attempt || 0) + 1
-      sleep(200 ** payload.attempt).then(() => 
-        events.sendEvent('', BROACASTER_INDEX_ROUTES, payload)
-      )
-    } else {
-      vbase.deleteFile(BUCKET, FILE).then(() => 
-        logger.info({ message: 'Indexation ended', payload })
-      )
-    }
-  })
+export async function indexRoutes(ctx: Context) {
+  const { vtex: { logger } } = ctx
+  logger.info({ message: 'Event received', payload: ctx.body})
+  try {
+    await index(ctx)
+  } catch (error) {
+    logger.error({ message: 'Indexation error', error, payload: ctx.body})
+    throw error
+  }
 }
 
 export async function indexAllRoutes(ctx: ServiceContext) {
