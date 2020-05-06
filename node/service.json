@@ -8,6 +8,9 @@
   "events": {
     "broadcasterNotification": {
       "keys": ["broadcaster.notification"]
+    },
+    "indexRoutes": {
+      "keys": ["broadcaster.indexRoutes"]
     }
   },
   "routes": {

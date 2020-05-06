@@ -6,14 +6,22 @@ declare global {
   type Context = EventContext<Clients, State>
   type ServiceContext = ServiceCtx<Clients, State, ParamsContext>
 
-  interface State extends RecorderState, BroadcasterEvent {
-    payload: BroadcasterEvent
+  interface State extends RecorderState, BroadcasterEvent, IndexRoutesEvent {
+    nextPayload: IndexRoutesEvent
   }
 
   interface BroadcasterEvent {
     HasStockKeepingUnitModified: boolean
     IdSku: string
     indexBucket?: string
+  }
+
+  interface IndexRoutesEvent {
+    indexBucket?: string
+    from: number
+    processedProducts: number
+    productsWithoutSKU: number
+    attempt?: number
   }
 
   interface IdentifiedCategory extends Category {

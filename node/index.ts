@@ -3,9 +3,10 @@ import { LRUCache, Service, Cached, ParamsContext } from '@vtex/api'
 import { locale } from './middlewares/locale'
 import { notify } from './middlewares/notify'
 import { throttle } from './middlewares/throttle'
-import { indexRoutes } from './middlewares/indexRoutes'
+import { indexRoutes, indexAllRoutes } from './middlewares/indexRoutes'
 import { Clients } from './clients'
 import { validation } from './middlewares/validation'
+import { nextEvent } from './middlewares/nextEvent'
 
 const TREE_SECONDS_MS = 3 * 1000
 const CONCURRENCY = 10
@@ -53,8 +54,9 @@ export default new Service<Clients, State, ParamsContext>({
     broadcasterNotification: [
       throttle, locale, notify,
     ],
+    indexRoutes: [indexRoutes, nextEvent],
   },
   routes: {
-    indexRoutes: [validation, indexRoutes],
+    indexRoutes: [validation, indexAllRoutes],
   },
 })
