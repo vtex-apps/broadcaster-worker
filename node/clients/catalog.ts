@@ -18,6 +18,7 @@ export class Catalog extends ExternalClient {
         ...(options ?? {}),
         headers: {
           ...(options?.headers ?? {}),
+          'VtexIdclientAutCookie': context.authToken,
           'Content-Type': 'application/json',
           'X-Vtex-Use-Https': 'true',
         }, 
@@ -25,14 +26,13 @@ export class Catalog extends ExternalClient {
     )
   }
 
-  public getProductsAndSkuIds (from: number, to: number, authToken?: string): Promise<GetProductsAndSkuIdsReponse>{
+  public getProductsAndSkuIds (from: number, to: number): Promise<GetProductsAndSkuIdsReponse>{
     return this.http.get('/api/catalog_system/pvt/products/GetProductAndSkuIds', {
       params: {
         _from: from,
         _to: to
       },
       headers: {
-        ...authToken ? { VtexIdclientAutCookie: authToken } : {},
       }
     })
   }

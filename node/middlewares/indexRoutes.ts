@@ -16,7 +16,7 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
     productsWithoutSKU,
   }: IndexRoutesEvent = body
 
-  const dataFile = await vbase.getJSON<{ indexBucket: string, authToken: string }>(BUCKET, FILE, true)
+  const dataFile = await vbase.getJSON<{ indexBucket: string }>(BUCKET, FILE, true)
   if (dataFile?.indexBucket != indexBucket) {
     logger.debug({ 
       message: 'Invalid Indexation', 
@@ -26,9 +26,8 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
     return
   }
 
-  const { authToken } = dataFile
   const to = from + PAGE_LIMIT - 1
-  const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
+  const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to)
   let countProductsWithoutSKU = 0
 
   const productIds = Object.keys(data)
@@ -94,16 +93,10 @@ export async function indexRoutes(ctx: Context, next: () => Promise<void>) {
 }
 
 export async function indexAllRoutes(ctx: ServiceContext) {
-  const { clients: { events, vbase }, vtex: { adminUserAuthToken, logger } } = ctx
-  if (!adminUserAuthToken) {
-    ctx.status = 401
-    logger.error(`Missing adminUserAuth token`)
-    return
-  }
+  const { clients: { events, vbase } } = ctx
   const indexBucket = (Math.random() * 10000).toString()
   await vbase.saveJSON(BUCKET, FILE, {
     indexBucket,
-    authToken: adminUserAuthToken,
   })
 
   const payload: IndexRoutesEvent = {
