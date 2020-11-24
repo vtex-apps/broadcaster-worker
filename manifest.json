@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema",
   "name": "broadcaster-worker",
   "vendor": "vtex",
-  "version": "0.4.2-beta.1",
+  "version": "0.4.2",
   "title": "Broadcaster Worker",
   "description": "Reference app for VTEX IO Services",
   "dependencies": {
