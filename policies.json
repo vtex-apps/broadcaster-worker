@@ -1,0 +1,15 @@
+[
+  {
+    "name": "index-routes",
+    "description": "Allows access to send change notifications for all items in the store's catalog",
+    "statements": [
+      {
+        "effect": "allow",
+        "actions": ["post"],
+        "resources": [
+          "vrn:vtex.broadcaster-worker:{{region}}:{{account}}:{{workspace}}:/index-routes"
+        ]
+      }
+    ]
+  }
+]

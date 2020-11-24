@@ -184,14 +184,14 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.35.0":
-  version "6.35.0"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.35.0.tgz#1970a8974f8bf9fbc70fb4e6758b78d46c8b1f87"
-  integrity sha512-RWH9wqpHHV0FtGlK4AxrsFcjVxhl3ZVTQRKboEgOI+7Ts9scLkBoEyYnwtQzvjfAkJgxUNCmvqsKPN2HxAnWlQ==
+"@vtex/api@6.37.0":
+  version "6.37.0"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.37.0.tgz#a07e6adbfc02866f901cf0cfff2155f2c279adc5"
+  integrity sha512-Vy970ZfgOttrxeiJW2oM8rQ0E8t/HE5cQhbGIawfJsu35HEWA9NnWRSR3bdLMczT9oYIY9QwE8IfdU4b44dhKw==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
-    "@vtex/node-error-report" "^0.0.2"
+    "@vtex/node-error-report" "^0.0.3"
     "@wry/equality" "^0.1.9"
     agentkeepalive "^4.0.2"
     apollo-server-errors "^2.2.1"
@@ -229,10 +229,10 @@
     uuid "^3.3.3"
     xss "^1.0.6"
 
-"@vtex/node-error-report@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@vtex/node-error-report/-/node-error-report-0.0.2.tgz#edf15095d6bb543d28b46f86bc109e6214149dfe"
-  integrity sha512-Q6V8E1IR/U0H6uTB1G+gH4ugL4Kw1l/WsK7W46LQBsxv4ISlZcO7dXPlWrL4RzRcVam5yzGAwNkv2wJdW61tAA==
+"@vtex/node-error-report@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@vtex/node-error-report/-/node-error-report-0.0.3.tgz#365a2652aeebbd6b51ddc5d64c3c0bc1a326dc71"
+  integrity sha512-HhBworWQfSs6PU3yroloc7H2/pWboDIzgdiJ6SYc3mJVRU5/bXtwM9HGPkAGZvAb/0cMwFC963SYYKvOfeSjbA==
   dependencies:
     is-stream "^2.0.0"
 
@@ -2066,10 +2066,10 @@ type-is@^1.6.16:
     media-typer "0.3.0"
     mime-types "~2.1.18"
 
-typescript@3.8.3:
-  version "3.8.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.8.3.tgz#409eb8544ea0335711205869ec458ab109ee1061"
-  integrity sha512-MYlEfn5VrLNsgudQTVJeNaQFUAI7DkhnOjdpAp4T+ku1TfQClewlbSuTVHiA+8skNBgaf02TL/kLOvig4y3G8w==
+typescript@3.9.7:
+  version "3.9.7"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
+  integrity sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
 
 universalify@^0.1.0:
   version "0.1.2"
