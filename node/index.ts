@@ -7,6 +7,7 @@ import { indexRoutes, indexAllRoutes } from './middlewares/indexRoutes'
 import { Clients } from './clients'
 import { validation } from './middlewares/validation'
 import { nextEvent } from './middlewares/nextEvent'
+import { errors } from './middlewares/errors'
 
 const TREE_SECONDS_MS = 3 * 1000
 const CONCURRENCY = 10
@@ -52,9 +53,9 @@ export default new Service<Clients, State, ParamsContext>({
   },
   events: {
     broadcasterNotification: [
-      throttle, locale, notify,
+      errors, throttle, locale, notify,
     ],
-    indexRoutes: [indexRoutes, nextEvent],
+    indexRoutes: [errors, indexRoutes, nextEvent],
   },
   routes: {
     indexRoutes: [validation, indexAllRoutes],
