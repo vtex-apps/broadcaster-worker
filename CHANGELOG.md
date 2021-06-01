@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.0] - 2021-06-01
+
 ## [0.4.3] - 2021-02-11
 ### Fixed
 - Forwards 429 error
