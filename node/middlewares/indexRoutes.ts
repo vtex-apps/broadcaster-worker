@@ -16,11 +16,21 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
     productsWithoutSKU,
   }: IndexRoutesEvent = body
 
-  const dataFile = await vbase.getJSON<{ indexBucket: string }>(BUCKET, FILE, true)
+  const dataFile = await vbase.getJSON<IndexRoutesEvent>(BUCKET, FILE, true)
   if (dataFile?.indexBucket != indexBucket) {
     logger.debug({ 
       message: 'Invalid Indexation', 
       currentIndexBucket: dataFile?.indexBucket, 
+      receivedIndexBucket: indexBucket
+    })
+    return
+  }
+
+  if (from < (dataFile?.from ?? 0)) {
+    logger.debug({
+      message: 'Duplicated event',
+      currentIndexBucket: dataFile?.indexBucket,
+      from,
       receivedIndexBucket: indexBucket
     })
     return
@@ -78,6 +88,7 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
       indexBucket,
     })
 
+    await vbase.saveJSON(BUCKET, FILE, payload)
     await next()
   }
 }
@@ -95,9 +106,8 @@ export async function indexRoutes(ctx: Context, next: () => Promise<void>) {
 export async function indexAllRoutes(ctx: ServiceContext) {
   const { clients: { events, vbase } } = ctx
   const indexBucket = (Math.random() * 10000).toString()
-  await vbase.saveJSON(BUCKET, FILE, {
-    indexBucket,
-  })
+  const data = { indexBucket, from: 0 }
+  await vbase.saveJSON(BUCKET, FILE, data)
 
   const payload: IndexRoutesEvent = {
     indexBucket,
