@@ -10,7 +10,7 @@ interface GetProductsAndSkuIdsReponse {
 }
 
 export class Catalog extends ExternalClient {
-  constructor(context: IOContext, options?: InstanceOptions) {
+  public constructor(context: IOContext, options?: InstanceOptions) {
     super(
       `http://${context.account}.vtexcommercestable.com.br`,
       context,
