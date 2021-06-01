@@ -16,7 +16,7 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
     productsWithoutSKU,
   }: IndexRoutesEvent = body
 
-  const dataFile = await vbase.getJSON<IndexRoutesEvent>(BUCKET, FILE, true)
+  const { data: dataFile, headers: {etag} } = await vbase.getRawJSON<IndexRoutesEvent>(BUCKET, FILE, true)
   if (dataFile?.indexBucket != indexBucket) {
     logger.debug({ 
       message: 'Invalid Indexation', 
@@ -88,8 +88,11 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
       indexBucket,
     })
 
-    await vbase.saveJSON(BUCKET, FILE, payload)
-    await next()
+    const shouldTriggerNext : boolean = await vbase.saveJSON(BUCKET, FILE, payload, undefined, etag)
+      .then(_ => true)
+      .catch(e => e?.response?.status != 412)
+
+    if (shouldTriggerNext) await next()
   }
 }
 
