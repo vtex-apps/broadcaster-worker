@@ -184,10 +184,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.39.1":
-  version "6.39.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.39.1.tgz#ad675cf46404b0d21476ac441626843b6950c4a2"
-  integrity sha512-w3FghXguk4b+bOSOihB8I4+gGt7JljRCXFgirK9XiHDOr+uPsUEGhC4JeeQ42aBIEQeyGmQQOsyvZ+qZp2C/oA==
+"@vtex/api@6.42.1":
+  version "6.42.1"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.42.1.tgz#b0030afa16750f995bf8296bdc8b22ce2fa5907b"
+  integrity sha512-b9U+G1ZuZ6MOsbiLn+/FEW/XnTIGnsKam1YxUf7OHJhPY+ebupkxIhFeAWub/Mf8xELaNl+0EdrwUbuq4dNFxQ==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -226,6 +226,7 @@
     semver "^5.5.1"
     stats-lite vtex/node-stats-lite#dist
     tar-fs "^2.0.0"
+    tokenbucket "^0.3.2"
     uuid "^3.3.3"
     xss "^1.0.6"
 
@@ -419,6 +420,11 @@ bl@^3.0.0:
   integrity sha512-EUAyP5UHU5hxF8BPT0LKW8gjYLhq1DQIcneOX/pL/m2Alo+OYDQAJlHq+yseMP50Os2nHXOSic6Ss3vSQeyf4A==
   dependencies:
     readable-stream "^3.0.1"
+
+bluebird@2.9.24:
+  version "2.9.24"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-2.9.24.tgz#14a2e75f0548323dc35aa440d92007ca154e967c"
+  integrity sha1-FKLnXwVIMj3DWqRA2SAHyhVOlnw=
 
 bluebird@^3.5.4:
   version "3.5.5"
@@ -1749,6 +1755,11 @@ readable-stream@^3.0.1, readable-stream@^3.1.1:
     string_decoder "^1.1.1"
     util-deprecate "^1.0.1"
 
+redis@^0.12.1:
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-0.12.1.tgz#64df76ad0fc8acebaebd2a0645e8a48fac49185e"
+  integrity sha1-ZN92rQ/IrOuuvSoGReikj6xJGF4=
+
 regexpp@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/regexpp/-/regexpp-2.0.1.tgz#8d19d31cf632482b589049f8281f93dbcba4d07f"
@@ -2021,6 +2032,14 @@ toidentifier@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
+
+tokenbucket@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/tokenbucket/-/tokenbucket-0.3.2.tgz#8172b2b58e3083acc8d914426fed15162a3a8e90"
+  integrity sha1-gXKytY4wg6zI2RRCb+0VFio6jpA=
+  dependencies:
+    bluebird "2.9.24"
+    redis "^0.12.1"
 
 ts-invariant@^0.2.1:
   version "0.2.1"
