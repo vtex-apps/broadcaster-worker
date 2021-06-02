@@ -7,7 +7,7 @@ const BUCKET = 'indexRoutes'
 const FILE = 'data.json'
 
 const index = async (ctx: Context, next: () => Promise<void>) => {
-  const { clients: { catalog, events, vbase }, vtex: { logger }, body } = ctx
+  const { clients: { catalog, events, noCacheVBase }, vtex: { logger }, body } = ctx
   logger.info({ message: 'Event received', payload: ctx.body})
   const {
     indexBucket,
@@ -16,7 +16,7 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
     productsWithoutSKU,
   }: IndexRoutesEvent = body
 
-  const { data: dataFile, headers: {etag} } = await vbase.getRawJSON<IndexRoutesEvent>(BUCKET, FILE, true)
+  const { data: dataFile, headers: {etag} } = await noCacheVBase.getRawJSON<IndexRoutesEvent>(BUCKET, FILE, true)
   if (dataFile?.indexBucket != indexBucket) {
     logger.debug({ 
       message: 'Invalid Indexation', 
@@ -77,7 +77,7 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
       total, 
       indexBucket 
     })
-    await vbase.deleteFile(BUCKET, FILE)
+    await noCacheVBase.deleteFile(BUCKET, FILE)
     return
   } else {
     logger.info({
@@ -89,7 +89,7 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
       indexBucket,
     })
 
-    const shouldTriggerNext : boolean = await vbase.saveJSON(BUCKET, FILE, payload, undefined, etag)
+    const shouldTriggerNext : boolean = await noCacheVBase.saveJSON(BUCKET, FILE, payload, undefined, etag)
       .then(_ => true)
       .catch(e => e?.response?.status != 412)
 
@@ -108,10 +108,10 @@ export async function indexRoutes(ctx: Context, next: () => Promise<void>) {
 }
 
 export async function indexAllRoutes(ctx: ServiceContext) {
-  const { clients: { events, vbase } } = ctx
+  const { clients: { events, noCacheVBase } } = ctx
   const indexBucket = (Math.random() * 10000).toString()
   const data = { indexBucket, from: 0 }
-  await vbase.saveJSON(BUCKET, FILE, data)
+  await noCacheVBase.saveJSON(BUCKET, FILE, data)
 
   const payload: IndexRoutesEvent = {
     indexBucket,
