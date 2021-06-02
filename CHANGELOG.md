@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Improved concurrency handling of `indexRoutes` events.
+- Add settings middleware to the indexRoutes event too.
+- Log debug info when indexing is disabled.
+
+### Fixed
+- Only increment throttle counter when we do process the event.
 
 ## [0.5.0] - 2021-06-01
 
