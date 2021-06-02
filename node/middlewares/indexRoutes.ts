@@ -21,6 +21,7 @@ const index = async (ctx: Context, next: () => Promise<void>) => {
     logger.debug({ 
       message: 'Invalid Indexation', 
       currentIndexBucket: dataFile?.indexBucket, 
+      from,
       receivedIndexBucket: indexBucket
     })
     return
