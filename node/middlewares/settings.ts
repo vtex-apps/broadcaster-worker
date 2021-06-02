@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS = {
 export async function settings(ctx: Context, next: () => Promise<void>) {
   const {
     clients: { apps },
+    vtex: { logger },
   } = ctx
 
   const { disableIndexation } = {
@@ -19,6 +20,10 @@ export async function settings(ctx: Context, next: () => Promise<void>) {
     ...(await apps.getAppSettings(VTEX_APP_AT_MAJOR) as Settings),
   }
   if (disableIndexation) {
+    logger.debug({
+      message: 'Indexing disabled',
+      ...ctx.body,
+    })
     return
   }
 
