@@ -8,13 +8,14 @@ export async function throttle(
   _: Context,
   next: () => Promise<void>
 ) {
-  COUNTER++
+  if (COUNTER > MAX_REQUEST) {
+    const timeToSleep = Math.ceil(Math.random() * 100)
+    await sleep(timeToSleep)
+    throw new TooManyRequestsError()
+  }
+
   try {
-    if (COUNTER > MAX_REQUEST) {
-      const timeToSleep = Math.ceil(Math.random() * 100)
-      await sleep(timeToSleep)
-      throw new TooManyRequestsError()
-    }
+    COUNTER++
     await next()
   } finally {
     COUNTER--
