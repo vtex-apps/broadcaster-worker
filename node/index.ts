@@ -9,7 +9,7 @@ import { validation } from './middlewares/validation'
 import { nextEvent } from './middlewares/nextEvent'
 import { errors } from './middlewares/errors'
 import { settings } from './middlewares/settings'
-import { stockFilterEvents } from './middlewares/stockFilter'
+import { filterStockEvents } from './middlewares/filterStock'
 
 const TREE_SECONDS_MS = 3 * 1000
 const CONCURRENCY = 10
@@ -55,7 +55,7 @@ export default new Service<Clients, State, ParamsContext>({
   },
   events: {
     broadcasterNotification: [
-      stockFilterEvents, settings, errors, throttle, locale, notify,
+      filterStockEvents, settings, errors, throttle, locale, notify,
     ],
     indexRoutes: [settings, errors, indexRoutes, nextEvent],
   },
