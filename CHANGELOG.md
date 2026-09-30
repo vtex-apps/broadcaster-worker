@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Read SKU, product, brand and category from the Catalog REST API (`/api/catalog/pvt/*`) instead of `vtex.catalog-graphql`, which since 1.108 only accepts admin user tokens. The entities keep the same shape, so change detection hashes are preserved.
+
+### Removed
+- `vtex.catalog-graphql` dependency and its `resolve-graphql` policy.
 
 ## [0.5.3] - 2026-09-30
 ### Fixed
