@@ -45,16 +45,15 @@ const replaceIfChanged = async <T>(
   return false
 }
 
-const getAllCategories = async (categoryId: string | undefined, ctx: Context): Promise<IdentifiedCategory[]> => {
-  const { clients: { catalogGraphQL } } = ctx
+const getAllCategories = async (categoryId: string | null | undefined, ctx: Context): Promise<IdentifiedCategory[]> => {
+  const { clients: { catalog } } = ctx
   if (!categoryId) {
     return []
   }
-  const categoryResponse = await catalogGraphQL.category(categoryId)
-  if (!categoryResponse || !categoryResponse.category) {
+  const category = await catalog.getCategory(categoryId)
+  if (!category) {
     return []
   }
-  const { category } = categoryResponse
   const categories = await getAllCategories(category.parentCategoryId, ctx)
   const identifiedCategory = {
     ...category,
@@ -65,7 +64,7 @@ const getAllCategories = async (categoryId: string | undefined, ctx: Context): P
 
 export async function notify(ctx: Context, next: () => Promise<any>) {
   const {
-    clients: { catalogGraphQL, events },
+    clients: { catalog, events },
     clients,
     body: { IdSku, indexBucket },
     vtex: { logger },
@@ -76,11 +75,10 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   const logWholeProductAndSku = {sku: {}, product: {}}
 
   // Modification in SKU
-  const skuResponse = await catalogGraphQL.sku(IdSku)
-  if (!skuResponse || !skuResponse.sku) {
+  const sku = await catalog.getSku(IdSku)
+  if (!sku) {
     return
   }
-  const { sku } = skuResponse
   const filenameSku = providerToVbaseFilename(toSkuProvider(sku.id))
   let changed = await replaceIfChanged(sku, filenameSku, bucket, clients)
   if (changed) {
@@ -90,11 +88,10 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   }
 
   // Modification in Product
-  const productResponse = await catalogGraphQL.product(sku.productId)
-  if (!productResponse || !productResponse.product) {
+  const product = await catalog.getProduct(sku.productId)
+  if (!product) {
     return
   }
-  const { product } = productResponse
   const filenameProduct = providerToVbaseFilename(
     toProductProvider(sku.productId)
   )
@@ -106,11 +103,10 @@ export async function notify(ctx: Context, next: () => Promise<any>) {
   }
 
   // Modification in Brand
-  const brandResponse = await catalogGraphQL.brand(product.brandId)
-  if (!brandResponse || !brandResponse.brand) {
+  const brand = await catalog.getBrand(product.brandId)
+  if (!brand) {
     return
   }
-  const { brand } = brandResponse
   const filenameBrand = providerToVbaseFilename(
     toBrandProvider(product.brandId)
   )

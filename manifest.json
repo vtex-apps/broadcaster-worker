@@ -6,8 +6,7 @@
   "title": "Broadcaster Worker",
   "description": "Reference app for VTEX IO Services",
   "dependencies": {
-    "vtex.catalog-api-proxy": "0.x",
-    "vtex.catalog-graphql": "1.x"
+    "vtex.catalog-api-proxy": "0.x"
   },
   "builders": {
     "node": "6.x",
@@ -40,6 +39,13 @@
       }
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/catalog/*"
+      }
+    },
+    {
       "name": "colossus-fire-event"
     },
     {
@@ -47,9 +53,6 @@
     },
     {
       "name": "vbase-read-write"
-    },
-    {
-      "name": "vtex.catalog-graphql:resolve-graphql"
     },
     {
       "name": "ViewProduct"

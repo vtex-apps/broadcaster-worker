@@ -1,4 +1,4 @@
-import { Category } from '@vtex/api/lib/clients/apps/catalogGraphQL/category'
+import { Category } from './utils/catalogMappers'
 import { RecorderState, EventContext, ServiceContext as ServiceCtx, ParamsContext } from '@vtex/api'
 import { Clients } from './clients/index'
 
