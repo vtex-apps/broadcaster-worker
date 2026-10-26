@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
-- Migrate `node` builder from `6.x` to `7.x`.
+- Migrate `node` builder from `6.x` to `7.x`, updating `@vtex/api` to `^7.0.0`, `typescript` to `5.5.3` and `@types/node` to `^20.0.0`.
 
 ## [0.5.3] - 2026-09-30
 ### Fixed
